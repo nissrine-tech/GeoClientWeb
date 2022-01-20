@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:view contentType="text/html">
+        <h:head>
+            <f:facet name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title>G position</title>
+            </f:facet>
+        </h:head>
+
+        <h:body>
+
+            <p:layout fullPage="true">
+              
+                <p:layoutUnit position="north" size="100" resizable="true" closable="true" collapsible="true">
+                    <h:form>
+                        <p:panelGrid columns="4">
+                            <p:clock pattern="dd/MM/yyyy" />
+                            <p:clock pattern="hh:mm:ss" />
+                            <p:outputLabel value="Select Calendar"/>
+                            <p:calendar id="cal"  navigator="true" />
+                        </p:panelGrid>
+                    </h:form>
+                </p:layoutUnit>
+
+                <p:layoutUnit position="south" size="100" closable="true" collapsible="true">
+                    Footer
+                </p:layoutUnit>
+
+                <p:layoutUnit position="west" size="250" header="Menu" collapsible="true">
+                    <h:form>
+                        <p:menu>
+                            <p:submenu label="Navigations">
+                                <p:menuitem value="G. User" outcome="/web/user/userForm.xhtml" icon="ui-icon-star"/>
+                                <p:menuitem value="G. SmartPhone" outcome="/web/smartphone/smartphoneForm.xhtml" icon="ui-icon-star"/>
+                                <p:menuitem value="Rechercher" outcome="/web/smartphone/ListSmartPhoneUser.xhtml" icon="ui-icon-star"/>
+
+                                <p:menuitem value="Map" outcome="map.xhtml" icon="ui-icon-star"/>
+                            </p:submenu>
+                        </p:menu> 
+                    </h:form>
+                </p:layoutUnit>
+                 <p:layoutUnit position="center">
+                    <p:panel header="Statistiques">
+                        <p:panelGrid columns="2">
+                            <p:barChart value="#{smartphoneBean.initBarModel()}" title="Nombre de smartphone par user" style="width : 500px; height: 500px"/>
+                            <p:barChart value="#{userBean.initBarModel()}" title="Nombre de users par nom" style="width : 500px; height: 500px"/>
+                        </p:panelGrid>
+                    </p:panel>
+                </p:layoutUnit>
+                <p:layoutUnit position="north" size="100" resizable="true" closable="true" collapsible="true">
+                    <p:panelGrid columns="2">
+                        Simple Gestion <br></br>et Localisation  des localisation
+                        <p:clock autoSync="true"/>
+                    </p:panelGrid>
+                </p:layoutUnit>
+
+
+                <p:layoutUnit position="center">
+                    <h:form id="f1">
+                        <p:panel header="Gestion des Positions">
+                            <p:panelGrid columns="2" id="p1">
+                                <p:outputLabel value="Nom"/>
+                                <p:inputText id="nom" value="#{positionBean.position.nom}" required="true"/>
+                                <p:outputLabel value="latitude"/>
+                                <p:inputText id="latitude" value="#{positionBean.position.latitude}" required="true"/>
+                                <p:outputLabel value="Longitude"/>
+                                <p:inputText id="longitude" value="#{positionBean.position.longitude}" required="true"/>
+                            </p:panelGrid>
+                            <p:commandButton value="Ajouter" actionListener="#{positionBean.onCreate}" update=":f2, f1:p1"/>        
+                        </p:panel>
+                    </h:form>
+
+                    <f:view>
+                        <h:form id="f2">
+                            <p:dataTable id="tab" var="s" value="#{positionBean.positions}"  editable="true" paginator="true" rows="10">
+
+                                <f:facet name="header">
+                                    Liste des positions
+                                </f:facet>
+
+                                <p:ajax event="rowEdit" listener="#{positionBean.onEdit}"  />
+                                <p:ajax event="rowEditCancel" listener="#{positionBean.onCancel}"  />
+
+                                <p:column headerText="Nom" style="width:30%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{s.nom}" />
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{s.nom}" style="width:100%"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Latitude" style="width:30%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{s.latitude}" />
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{s.latitude}" style="width:100%"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+                                <p:column headerText="Longitude" style="width:30%">
+                                    <p:cellEditor>
+                                        <f:facet name="output">
+                                            <h:outputText value="#{s.longitude}" />
+                                        </f:facet>
+                                        <f:facet name="input">
+                                            <p:inputText value="#{s.longitude}" style="width:100%"/>
+                                        </f:facet>
+                                    </p:cellEditor>
+                                </p:column>
+
+                                <p:column headerText="Modifier" >
+                                    <p:rowEditor />
+                                </p:column>
+                                <p:column headerText="Supprimer">
+                                    <p:commandButton id="Supprimer" icon="ui-icon-trash"
+                                                     update=":f2:confirmDialog" oncomplete="PF('confirmation').show()"
+                                                     title="Supprimer">
+                                        <f:setPropertyActionListener target="#{positionBean.position}"
+                                                                     value="#{s}" />
+                                    </p:commandButton>
+                                </p:column>
+                            </p:dataTable>  
+                        
+                            <p:dialog id="confirmDialog" showEffect="fade"
+                                      header="Suppression d'un smartphone" 
+                                      widgetVar="confirmation">
+                                <h:panelGrid id="display" columns="2" cellpadding="4"
+                                     style="margin:0 auto;" />
+                                <h:inputHidden value="#{positionBean.position.id}" id="supp"
+                                               required="true" />
+                                
+                                <p:outputLabel
+                                    value="Etes vous sûr de vouloir supprimer cet smartphone ?" />
+                                <p:commandButton id="confirm" value="Oui"
+                                                 update=":f2:tab" oncomplete="PF('confirmation').hide();location.reload();"
+                                                 actionListener="#{positionBean.onDeleteAction}" />
+                                <p:commandButton id="decline" value="Non"
+                                                 onclick="PF('confirmation').hide()" type="button" />
+
+                            </p:dialog>
+                        </h:form>
+
+                    </f:view>
+                </p:layoutUnit>
+            </p:layout>
+        </h:body>
+    </f:view>
+
+</html>
